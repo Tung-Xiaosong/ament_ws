@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+
+	<!--include file="$(find robot_slam)/launch/gmapping.launch.py"/-->
+	
+	<node name="rviz2" pkg="rviz2" type="rviz2"/>
+</launch>
