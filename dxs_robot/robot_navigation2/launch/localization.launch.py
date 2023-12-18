@@ -15,17 +15,15 @@ def generate_launch_description():
     # Get the launch directory
     launch_dir = get_package_share_directory('robot_navigation2')
 
-    # Load map file
-    map_file = LaunchConfiguration('map_file', default='launch_dir/maps/c1.yaml')
-
-    amcl_configuration_file = LaunchConfiguration('amcl_configuration_file', default='launch_dir/param/amcl.yaml')
+    # Load param file
+    configuration_file = LaunchConfiguration('configuration_file', default='launch_dir/param/navigation2.yaml')
     
     map_server_node = Node(
         package='nav2_map_server',
         executable='map_server',
         name='map_server',
         output='screen',
-        parameters=[{'yaml_filename': map_file}],        
+        parameters=[{'yaml_filename': configuration_file}]        
     )
 
     amcl_node = Node(
@@ -33,7 +31,7 @@ def generate_launch_description():
         executable='amcl',
         name='amcl',
         output='screen',
-        parameters=[{'yaml_filename': amcl_configuration_file}]
+        parameters=[{'yaml_filename': configuration_file}]
     )
 
     return LaunchDescription([
