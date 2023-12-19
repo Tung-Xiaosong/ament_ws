@@ -45,12 +45,12 @@ def generate_launch_description():
         
     declare_map_yaml_cmd = DeclareLaunchArgument(
         'map',
-        default_value=os.path.join(bringup_dir, 'maps', 'g1.yaml'),
+        default_value=os.path.join(bringup_dir, 'map', 'g1.yaml'),
         description='Full path to map yaml file to load')
 
     declare_use_sim_time_cmd = DeclareLaunchArgument(
         'use_sim_time',
-        default_value='false',#dxs change false
+        default_value='true',#dxs change false
         description='Use simulation (Gazebo) clock if true')
 
     declare_params_file_cmd = DeclareLaunchArgument(

@@ -23,7 +23,7 @@ if(BUILD_TESTING)
 endif()
 #dxs add
 install(
-  DIRECTORY launch param maps config rviz 
+  DIRECTORY launch param map config rviz 
   DESTINATION share/${PROJECT_NAME}
 )
 
