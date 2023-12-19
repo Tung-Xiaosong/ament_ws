@@ -9,11 +9,11 @@ def generate_launch_description():
 	
 	# 定义要嵌套的launch文件的路径
 	included_launch_1 = IncludeLaunchDescription(
-		PythonLaunchDescriptionSource('/home/dxs/catkin_ws/src/ros2_21_tutorials/learning_gazebo/launch/load_robot_model_into_gazebo.launch.py')
+		PythonLaunchDescriptionSource('/home/dxs/colcon_ws/src/ros2_21_tutorials/learning_gazebo/launch/load_robot_model_into_gazebo.launch.py')
 	)	#（启动gazebo机器人模型仿真）
 	
 	included_launch_2 = IncludeLaunchDescription(
-		PythonLaunchDescriptionSource('/home/dxs/catkin_ws/src/SLAM/slam_gmapping/slam_gmapping/launch/slam_gmapping.launch.py')
+		PythonLaunchDescriptionSource('/home/dxs/colcon_ws/src/SLAM/slam_gmapping/slam_gmapping/launch/slam_gmapping.launch.py')
 	)	#（启动gmapping建图）
 
 	# 添加嵌套的launch文件到主LaunchDescription中
