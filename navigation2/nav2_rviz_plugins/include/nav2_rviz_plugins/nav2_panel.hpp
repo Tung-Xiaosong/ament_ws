@@ -22,18 +22,30 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <fstream>
+#include <cmath>
 
+#include "ament_index_cpp/get_package_share_directory.hpp"
 #include "nav2_lifecycle_manager/lifecycle_manager_client.hpp"
 #include "nav2_msgs/action/navigate_to_pose.hpp"
 #include "nav2_msgs/action/navigate_through_poses.hpp"
 #include "nav2_msgs/action/follow_waypoints.hpp"
+#include "yhs_can_interfaces/action/record_path.hpp"
 #include "nav2_rviz_plugins/ros_action_qevent.hpp"
 #include "rclcpp/rclcpp.hpp"
+#include <nav2_util/robot_utils.hpp>
 #include "rclcpp_action/rclcpp_action.hpp"
 #include "rviz_common/panel.hpp"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 #include "visualization_msgs/msg/marker_array.hpp"
 #include "nav2_util/geometry_utils.hpp"
+#include "tf2/LinearMath/Quaternion.h"
+#include "tf2_ros/transform_listener.h"
+#include "tf2_ros/transform_broadcaster.h"
+#include "std_msgs/msg/u_int8.hpp"
+
+#include "geometry_msgs/msg/quaternion.hpp"
+#include "tf2/utils.h"
 
 class QPushButton;
 
@@ -69,6 +81,13 @@ private Q_SLOTS:
   void onAccumulating();
   void onNewGoal(double x, double y, double theta, QString frame);
 
+  //录制路径
+  void onCheckBoxStateChanged(int state);
+  void onRecordButtonClicked();
+  void updateRobotPose();
+  void onLoadButtonClicked();
+  void startFollowRecordPath();
+
 private:
   void loadLogFiles();
   void onCancelButtonPressed();
@@ -87,6 +106,9 @@ private:
   using NavThroughPosesGoalHandle =
     rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateThroughPoses>;
 
+  using RecordPathGoalHandle =
+    rclcpp_action::ClientGoalHandle<yhs_can_interfaces::action::RecordPath>;
+
   // The (non-spinning) client node used to invoke the action client
   rclcpp::Node::SharedPtr client_node_;
 
@@ -96,12 +118,29 @@ private:
   // A timer used to check on the completion status of the action
   QBasicTimer timer_;
 
+  //录制路径
+  bool loop_;
+  std::ofstream outfile_;
+  bool recording_;
+  std::string record_path_file_;
+  int8_t goal_status_;
+  nav_msgs::msg::Path record_path_msg_;
+  rclcpp::TimerBase::SharedPtr record_path_timer_;
+  geometry_msgs::msg::PoseStamped last_recorded_pose_;
+  std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
+  std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
+  rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr record_path_publisher_;
+
+  //导航类型
+  rclcpp::Publisher<std_msgs::msg::UInt8>::SharedPtr nav_type_publisher_;
+
   // The NavigateToPose action client
   rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SharedPtr navigation_action_client_;
   rclcpp_action::Client<nav2_msgs::action::FollowWaypoints>::SharedPtr
     waypoint_follower_action_client_;
   rclcpp_action::Client<nav2_msgs::action::NavigateThroughPoses>::SharedPtr
     nav_through_poses_action_client_;
+  rclcpp_action::Client<yhs_can_interfaces::action::RecordPath>::SharedPtr record_path_action_client_;
 
   // Navigation action feedback subscribers
   rclcpp::Subscription<nav2_msgs::action::NavigateToPose::Impl::FeedbackMessage>::SharedPtr
@@ -113,13 +152,21 @@ private:
   rclcpp::Subscription<nav2_msgs::action::NavigateThroughPoses::Impl::GoalStatusMessage>::SharedPtr
     nav_through_poses_goal_status_sub_;
 
+  rclcpp::Subscription<yhs_can_interfaces::action::RecordPath::Impl::GoalStatusMessage>::SharedPtr
+    record_path_goal_status_sub_;
+  
+  rclcpp::Subscription<yhs_can_interfaces::action::RecordPath::Impl::FeedbackMessage>::SharedPtr
+    record_path_feedback_sub_;
+
   // Goal-related state
   nav2_msgs::action::NavigateToPose::Goal navigation_goal_;
   nav2_msgs::action::FollowWaypoints::Goal waypoint_follower_goal_;
   nav2_msgs::action::NavigateThroughPoses::Goal nav_through_poses_goal_;
+  yhs_can_interfaces::action::RecordPath::Goal record_path_goal_;
   NavigationGoalHandle::SharedPtr navigation_goal_handle_;
   WaypointFollowerGoalHandle::SharedPtr waypoint_follower_goal_handle_;
   NavThroughPosesGoalHandle::SharedPtr nav_through_poses_goal_handle_;
+  RecordPathGoalHandle::SharedPtr record_path_goal_handle_;
 
   // The client used to control the nav2 stack
   std::shared_ptr<nav2_lifecycle_manager::LifecycleManagerClient> client_nav_;
@@ -128,6 +175,8 @@ private:
   QPushButton * start_reset_button_{nullptr};
   QPushButton * pause_resume_button_{nullptr};
   QPushButton * navigation_mode_button_{nullptr};
+  QPushButton * start_record_path_button_{nullptr};
+  QPushButton * load_record_path_button_{nullptr};
 
   QLabel * navigation_status_indicator_{nullptr};
   QLabel * localization_status_indicator_{nullptr};
@@ -154,6 +203,13 @@ private:
   QState * accumulating_{nullptr};
   QState * accumulated_wp_{nullptr};
   QState * accumulated_nav_through_poses_{nullptr};
+
+  //正在录制路径状态
+  QState * recording_path_{nullptr}; 
+  //执行到路径起始点状态  
+  QState * go_to_record_path_init_pose_{nullptr};  
+  //执行跟随路径状态
+  QState * accumulated_follow_record_path_{nullptr};
 
   std::vector<geometry_msgs::msg::PoseStamped> acummulated_poses_;
 

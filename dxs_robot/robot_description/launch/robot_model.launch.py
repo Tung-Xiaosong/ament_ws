@@ -34,7 +34,7 @@ def generate_launch_description():
     return LaunchDescription([
         DeclareLaunchArgument(
             'use_sim_time',
-            default_value='false',  #是否使用仿真时间
+            default_value='false',  #是否使用仿真时间 dxs change false
             description='Use sim time if true'),
 
         node_robot_state_publisher

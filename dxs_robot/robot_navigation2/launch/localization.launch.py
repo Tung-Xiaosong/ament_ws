@@ -4,8 +4,8 @@ from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, GroupAction, SetEnvironmentVariable
-from launch.condition import IfCondition
-from launch.substitution import LaunchConfiguration, PythonExpression
+from launch.conditions import IfCondition
+from launch.substitutions import LaunchConfiguration, PythonExpression
 from launch_ros.actions import LoadComposableNodes
 from launch_ros.actions import Node
 from launch_ros.descriptions import ComposableNode
@@ -45,11 +45,12 @@ def generate_launch_description():
         
     declare_map_yaml_cmd = DeclareLaunchArgument(
         'map',
+        default_value=os.path.join(bringup_dir, 'maps', 'g1.yaml'),
         description='Full path to map yaml file to load')
 
     declare_use_sim_time_cmd = DeclareLaunchArgument(
         'use_sim_time',
-        default_value='true',#dxs change false
+        default_value='false',#dxs change false
         description='Use simulation (Gazebo) clock if true')
 
     declare_params_file_cmd = DeclareLaunchArgument(

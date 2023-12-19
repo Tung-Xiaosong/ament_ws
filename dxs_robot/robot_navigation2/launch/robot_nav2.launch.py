@@ -72,7 +72,7 @@ def generate_launch_description():
 
     declare_use_sim_time_cmd = DeclareLaunchArgument(
         'use_sim_time',
-        default_value='true',
+        default_value='false', #dxs change false
         description='Use simulation (Gazebo) clock if true')
 
     declare_params_file_cmd = DeclareLaunchArgument(
@@ -123,7 +123,7 @@ def generate_launch_description():
 
 	      #定位、定图节点
         IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(os.path.join(launch_dir, 'localization_launch.py')),
+            PythonLaunchDescriptionSource(os.path.join(launch_dir, 'localization.launch.py')),
             launch_arguments={'namespace': namespace,
                               'map': map_yaml_file,
                               'use_sim_time': use_sim_time,
@@ -134,7 +134,7 @@ def generate_launch_description():
                               'container_name': 'nav2_container'}.items()),
 	      #导航相关节点
         IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(os.path.join(launch_dir, 'navigation_launch.py')),
+            PythonLaunchDescriptionSource(os.path.join(launch_dir, 'navigation2.launch.py')),
             launch_arguments={'namespace': namespace,
                               'use_sim_time': use_sim_time,
                               'autostart': autostart,

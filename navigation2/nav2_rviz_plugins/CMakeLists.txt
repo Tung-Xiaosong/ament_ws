@@ -19,6 +19,9 @@ find_package(geometry_msgs REQUIRED)
 find_package(nav2_util REQUIRED)
 find_package(nav2_lifecycle_manager REQUIRED)
 find_package(nav2_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Test Concurrent)
@@ -31,6 +34,7 @@ find_package(rviz_rendering REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
+find_package(yhs_can_interfaces REQUIRED)
 
 set(nav2_rviz_plugins_headers_to_moc
   include/nav2_rviz_plugins/goal_pose_updater.hpp
@@ -60,6 +64,9 @@ set(dependencies
   nav2_util
   nav2_lifecycle_manager
   nav2_msgs
+  tf2_ros
+  tf2
+  tf2_msgs
   nav_msgs
   pluginlib
   Qt5
@@ -71,6 +78,7 @@ set(dependencies
   rviz_rendering
   std_msgs
   tf2_geometry_msgs
+  yhs_can_interfaces
 )
 
 ament_target_dependencies(${library_name}
@@ -102,10 +110,13 @@ install(
   INCLUDES DESTINATION include
 )
 
-install(
-  DIRECTORY include/
-  DESTINATION include/
-)
+#install(
+#  DIRECTORY include/ data/
+#  DESTINATION include/ 
+#)
+
+install(DIRECTORY data
+    DESTINATION share/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -121,6 +132,7 @@ ament_export_dependencies(
   map_msgs
   nav_msgs
   rclcpp
+  yhs_can_interfaces
 )
 
 ament_package()
