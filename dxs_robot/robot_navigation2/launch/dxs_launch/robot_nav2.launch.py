@@ -17,7 +17,7 @@ def generate_launch_description():
     # Get the launch directory
     bringup_dir = get_package_share_directory('robot_navigation2')
     launch_dir = os.path.join(bringup_dir, 'launch')
-
+    
     robot_description_dir = os.path.join(get_package_share_directory('robot_description'),'launch')
 
     # Create the launch configuration variables
@@ -72,7 +72,7 @@ def generate_launch_description():
 
     declare_use_sim_time_cmd = DeclareLaunchArgument(
         'use_sim_time',
-        default_value='false',
+        default_value='true', #dxs change false
         description='Use simulation (Gazebo) clock if true')
 
     declare_params_file_cmd = DeclareLaunchArgument(
