@@ -62,7 +62,7 @@ def generate_launch_description():
         'use_sim_time': use_sim_time,
         'autostart': autostart}
 
-    configured_params = RewrittenYaml(  # 需要注意的仍然是这段代码，这里没有加入地图的yaml文件，仅仅将nav2_params.yaml作为参数传入configured_params。
+    configured_params = RewrittenYaml(  # 需要注意的仍然是这段代码，这里没有加入地图的yaml文件，仅仅将nav2_params.yaml作为参数传入 configured_params 。
             source_file=params_file,
             root_key=namespace,
             param_rewrites=param_substitutions,
