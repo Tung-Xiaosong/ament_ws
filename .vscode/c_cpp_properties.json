@@ -1,53 +1,55 @@
 {
-  "configurations": [
-    {
-      "browse": {
-        "databaseFilename": "${default}",
-        "limitSymbolsToIncludedHeaders": false
-      },
-      "includePath": [
-        "/opt/ros/humble/include/**",
-        "/home/dxs/colcon_ws/src/SLAM/cartographer_ros/cartographer_ros/include/**",
-        "/home/dxs/colcon_ws/src/SLAM/cartographer_ros/cartographer_rviz/include/**",
-        "/home/dxs/colcon_ws/src/SLAM/slam_gmapping/openslam_gmapping/include/**",
-        "/home/dxs/colcon_ws/src/SLAM/slam_gmapping/slam_gmapping/include/**",
-        "/home/dxs/colcon_ws/src/navigation2/nav2_amcl/include/**",
-        "/home/dxs/colcon_ws/src/navigation2/nav2_behavior_tree/include/**",
-        "/home/dxs/colcon_ws/src/navigation2/nav2_behaviors/include/**",
-        "/home/dxs/colcon_ws/src/navigation2/nav2_bt_navigator/include/**",
-        "/home/dxs/colcon_ws/src/navigation2/nav2_collision_monitor/include/**",
-        "/home/dxs/colcon_ws/src/navigation2/nav2_constrained_smoother/include/**",
-        "/home/dxs/colcon_ws/src/navigation2/nav2_controller/include/**",
-        "/home/dxs/colcon_ws/src/navigation2/nav2_core/include/**",
-        "/home/dxs/colcon_ws/src/navigation2/nav2_costmap_2d/include/**",
-        "/home/dxs/colcon_ws/src/navigation2/nav2_dwb_controller/costmap_queue/include/**",
-        "/home/dxs/colcon_ws/src/navigation2/nav2_dwb_controller/dwb_core/include/**",
-        "/home/dxs/colcon_ws/src/navigation2/nav2_dwb_controller/dwb_critics/include/**",
-        "/home/dxs/colcon_ws/src/navigation2/nav2_dwb_controller/dwb_plugins/include/**",
-        "/home/dxs/colcon_ws/src/navigation2/nav2_dwb_controller/nav_2d_utils/include/**",
-        "/home/dxs/colcon_ws/src/navigation2/nav2_lifecycle_manager/include/**",
-        "/home/dxs/colcon_ws/src/navigation2/nav2_map_server/include/**",
-        "/home/dxs/colcon_ws/src/navigation2/nav2_mppi_controller/include/**",
-        "/home/dxs/colcon_ws/src/navigation2/nav2_navfn_planner/include/**",
-        "/home/dxs/colcon_ws/src/navigation2/nav2_planner/include/**",
-        "/home/dxs/colcon_ws/src/navigation2/nav2_regulated_pure_pursuit_controller/include/**",
-        "/home/dxs/colcon_ws/src/navigation2/nav2_rotation_shim_controller/include/**",
-        "/home/dxs/colcon_ws/src/navigation2/nav2_rviz_plugins/include/**",
-        "/home/dxs/colcon_ws/src/navigation2/nav2_smac_planner/include/**",
-        "/home/dxs/colcon_ws/src/navigation2/nav2_smoother/include/**",
-        "/home/dxs/colcon_ws/src/navigation2/nav2_theta_star_planner/include/**",
-        "/home/dxs/colcon_ws/src/navigation2/nav2_util/include/**",
-        "/home/dxs/colcon_ws/src/navigation2/nav2_velocity_smoother/include/**",
-        "/home/dxs/colcon_ws/src/navigation2/nav2_voxel_grid/include/**",
-        "/home/dxs/colcon_ws/src/navigation2/nav2_waypoint_follower/include/**",
-        "/usr/include/**"
-      ],
-      "name": "ROS",
-      "intelliSenseMode": "gcc-x64",
-      "compilerPath": "/usr/bin/gcc",
-      "cStandard": "gnu11",
-      "cppStandard": "c++14"
-    }
-  ],
-  "version": 4
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "${default}",
+                "limitSymbolsToIncludedHeaders": false
+            },
+            "includePath": [
+                "/opt/ros/humble/include/**",
+                "/home/dxs/colcon_ws/src/SLAM/cartographer_ros/cartographer_ros/include/**",
+                "/home/dxs/colcon_ws/src/SLAM/cartographer_ros/cartographer_rviz/include/**",
+                "/home/dxs/colcon_ws/src/SLAM/slam_gmapping/openslam_gmapping/include/**",
+                "/home/dxs/colcon_ws/src/SLAM/slam_gmapping/slam_gmapping/include/**",
+                "/home/dxs/colcon_ws/src/navigation2/nav2_amcl/include/**",
+                "/home/dxs/colcon_ws/src/navigation2/nav2_behavior_tree/include/**",
+                "/home/dxs/colcon_ws/src/navigation2/nav2_behaviors/include/**",
+                "/home/dxs/colcon_ws/src/navigation2/nav2_bt_navigator/include/**",
+                "/home/dxs/colcon_ws/src/navigation2/nav2_collision_monitor/include/**",
+                "/home/dxs/colcon_ws/src/navigation2/nav2_constrained_smoother/include/**",
+                "/home/dxs/colcon_ws/src/navigation2/nav2_controller/include/**",
+                "/home/dxs/colcon_ws/src/navigation2/nav2_core/include/**",
+                "/home/dxs/colcon_ws/src/navigation2/nav2_costmap_2d/include/**",
+                "/home/dxs/colcon_ws/src/navigation2/nav2_dwb_controller/costmap_queue/include/**",
+                "/home/dxs/colcon_ws/src/navigation2/nav2_dwb_controller/dwb_core/include/**",
+                "/home/dxs/colcon_ws/src/navigation2/nav2_dwb_controller/dwb_critics/include/**",
+                "/home/dxs/colcon_ws/src/navigation2/nav2_dwb_controller/dwb_plugins/include/**",
+                "/home/dxs/colcon_ws/src/navigation2/nav2_dwb_controller/nav_2d_utils/include/**",
+                "/home/dxs/colcon_ws/src/navigation2/nav2_lifecycle_manager/include/**",
+                "/home/dxs/colcon_ws/src/navigation2/nav2_map_server/include/**",
+                "/home/dxs/colcon_ws/src/navigation2/nav2_mppi_controller/include/**",
+                "/home/dxs/colcon_ws/src/navigation2/nav2_navfn_planner/include/**",
+                "/home/dxs/colcon_ws/src/navigation2/nav2_planner/include/**",
+                "/home/dxs/colcon_ws/src/navigation2/nav2_regulated_pure_pursuit_controller/include/**",
+                "/home/dxs/colcon_ws/src/navigation2/nav2_rotation_shim_controller/include/**",
+                "/home/dxs/colcon_ws/src/navigation2/nav2_rviz_plugins/include/**",
+                "/home/dxs/colcon_ws/src/navigation2/nav2_smac_planner/include/**",
+                "/home/dxs/colcon_ws/src/navigation2/nav2_smoother/include/**",
+                "/home/dxs/colcon_ws/src/navigation2/nav2_theta_star_planner/include/**",
+                "/home/dxs/colcon_ws/src/navigation2/nav2_util/include/**",
+                "/home/dxs/colcon_ws/src/navigation2/nav2_velocity_smoother/include/**",
+                "/home/dxs/colcon_ws/src/navigation2/nav2_voxel_grid/include/**",
+                "/home/dxs/colcon_ws/src/navigation2/nav2_waypoint_follower/include/**",
+                "/usr/include/**",
+                "/home/dxs/colcon_ws/src/fishros2/village_interfaces/msg/**",
+                "/home/dxs/colcon_ws/src/fishros2/village_interfaces/srv/**"
+            ],
+            "name": "ROS",
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "gnu11",
+            "cppStandard": "c++14"
+        }
+    ],
+    "version": 4
 }
