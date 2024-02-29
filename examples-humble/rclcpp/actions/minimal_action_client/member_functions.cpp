@@ -28,11 +28,12 @@ class MinimalActionClient : public rclcpp::Node
 {
 public:
   using Fibonacci = example_interfaces::action::Fibonacci;
-  using GoalHandleFibonacci = rclcpp_action::ClientGoalHandle<Fibonacci>;
+  using GoalHandleFibonacci = rclcpp_action::ClientGoalHandle<Fibonacci>;//客户端目标处理句柄的模板类，用于管理与 Fibonacci 动作相关的目标状态和结果。通过这个句柄，客户端可以与服务器交互，发送目标并接收相关的状态和结果信息。
 
   explicit MinimalActionClient(const rclcpp::NodeOptions & node_options = rclcpp::NodeOptions())
   : Node("minimal_action_client", node_options), goal_done_(false)
   {
+    //step 5 创建客户端
     this->client_ptr_ = rclcpp_action::create_client<Fibonacci>(
       this->get_node_base_interface(),
       this->get_node_graph_interface(),
@@ -50,6 +51,7 @@ public:
     return this->goal_done_;
   }
 
+  //step 6 发送请求
   void send_goal()
   {
     using namespace std::placeholders;
@@ -73,17 +75,20 @@ public:
 
     RCLCPP_INFO(this->get_logger(), "Sending goal");
 
+    //step 7 创建 SendGoalOptions 的实例，用于配置发送目标的行为
     auto send_goal_options = rclcpp_action::Client<Fibonacci>::SendGoalOptions();
     send_goal_options.goal_response_callback =
-      std::bind(&MinimalActionClient::goal_response_callback, this, _1);
+      std::bind(&MinimalActionClient::goal_response_callback, this, _1);//发送目标后接收到响应时的回调函数
     send_goal_options.feedback_callback =
-      std::bind(&MinimalActionClient::feedback_callback, this, _1, _2);
+      std::bind(&MinimalActionClient::feedback_callback, this, _1, _2);//接收到反馈时的回调函数
     send_goal_options.result_callback =
-      std::bind(&MinimalActionClient::result_callback, this, _1);
+      std::bind(&MinimalActionClient::result_callback, this, _1);//接收到结果时的回调函数
+    //step 8 发送请求
     auto goal_handle_future = this->client_ptr_->async_send_goal(goal_msg, send_goal_options);
   }
 
 private:
+  //step 3 创建客户端对象
   rclcpp_action::Client<Fibonacci>::SharedPtr client_ptr_;
   rclcpp::TimerBase::SharedPtr timer_;
   bool goal_done_;
@@ -133,7 +138,9 @@ private:
 
 int main(int argc, char ** argv)
 {
+  //step 1 节点初始化
   rclcpp::init(argc, argv);
+  //step 2 创建节点对象
   auto action_client = std::make_shared<MinimalActionClient>();
 
   while (!action_client->is_goal_done()) {

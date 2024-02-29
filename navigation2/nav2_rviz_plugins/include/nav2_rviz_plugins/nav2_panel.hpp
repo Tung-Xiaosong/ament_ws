@@ -87,6 +87,7 @@ private Q_SLOTS:
   void updateRobotPose();
   void onLoadButtonClicked();
   void startFollowRecordPath();
+  void onPoseResetButtonClicked();
 
 private:
   void loadLogFiles();

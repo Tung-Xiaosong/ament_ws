@@ -20,7 +20,7 @@
 
 using AddTwoInts = example_interfaces::srv::AddTwoInts;
 //step 2 创建Node类的智能指针
-rclcpp::Node::SharedPtr g_node = nullptr; //初始时并没有指向任何对象。
+rclcpp::Node::SharedPtr g_node = nullptr; //mark 初始时并没有指向任何对象。在全局下创建Node的指针，可以在全局中使用get_logger()
 
 //step 6 创建服务端回调函数
 void handle_service(

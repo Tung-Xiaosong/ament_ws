@@ -99,8 +99,9 @@
         "done",
         "mark",
         "test",
-        "update",
-        "step"  //dxs add
+        //"update",
+        "step",  //dxs add
+        "c++"
     ],
     "todo-tree.regex.regexCaseSensitive": false,
     "todo-tree.highlights.defaultHighlight": {  //如果相应变量没赋值就会使用这里的默认值
@@ -116,9 +117,9 @@
         //todo 		需要做的功能
         "todo": {
             "icon": "alert",          //标签样式
-            "background": "#c9c552",  //背景色
-            "rulerColour": "#c9c552", //外框颜色
-            "iconColour": "#c9c552",  //标签颜色
+            "background": "#00fae5",  //背景色
+            "rulerColour": "#00fae5", //外框颜色
+            "iconColour": "#00fae5",  //标签颜色
         },
 
         //bug		必须要修复的BUG  
@@ -162,19 +163,26 @@
             "iconColour": "#df7be6",
         },
 
-        //update  	优化升级点
-        "update": {
-            "background": "#d65d8e",
-            "icon": "versions",
-            "rulerColour": "#d65d8e",
-            "iconColour": "#d65d8e",
-        },
+        // //update  	优化升级点
+        // "update": {
+        //     "background": "#d65d8e",
+        //     "icon": "versions",
+        //     "rulerColour": "#d65d8e",
+        //     "iconColour": "#d65d8e",
+        // },
         //step
         "step": {   //dxs add
             "background": "#f7f018",
             "icon": "versions",
             "rulerColour": "#f7f018",
             "iconColour": "#f7f018",
+        },
+        //c++
+        "c++": {   //dxs add
+            "background": "#f82e2e",
+            "icon": "versions",
+            "rulerColour": "#f82e2e",
+            "iconColour": "#f82e2e",
         }
     }
 }

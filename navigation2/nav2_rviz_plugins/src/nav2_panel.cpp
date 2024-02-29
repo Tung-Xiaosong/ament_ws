@@ -449,6 +449,13 @@ Nav2Panel::Nav2Panel(QWidget * parent)
 
   main_layout->addLayout(horizontalLayout);
 
+  // 创建复位导航点按钮
+  QPushButton *poseReset = new QPushButton("复位导航点");
+  main_layout->addWidget(poseReset, 0, Qt::AlignLeft | Qt::AlignBottom);
+
+  main_layout->setContentsMargins(10, 10, 10, 10);
+  setLayout(main_layout);
+
   // 创建复选框
   QCheckBox *checkBox = new QCheckBox("多点导航循环");
   main_layout->addWidget(checkBox, 0, Qt::AlignLeft | Qt::AlignBottom);
@@ -456,8 +463,12 @@ Nav2Panel::Nav2Panel(QWidget * parent)
   main_layout->setContentsMargins(10, 10, 10, 10);
   setLayout(main_layout);
 
+
   //复选框槽函数
   connect(checkBox, SIGNAL(stateChanged(int)), this, SLOT(onCheckBoxStateChanged(int)));
+
+  //复位导航点按钮槽函数
+  connect(poseReset, SIGNAL(clicked()), this, SLOT(onPoseResetButtonClicked()));
 
   navigation_action_client_ =
     rclcpp_action::create_client<nav2_msgs::action::NavigateToPose>(
@@ -675,6 +686,8 @@ Nav2Panel::onNewGoal(double x, double y, double theta, QString frame)
     acummulated_poses_.push_back(pose);
   } else {
     std::cout << "Start navigation" << std::endl;
+    acummulated_poses_.clear();
+    acummulated_poses_.push_back(pose);
     startNavigation(pose);
   }
 
@@ -762,6 +775,17 @@ Nav2Panel::onCheckBoxStateChanged(int state) {
 
   if(loop_) std::cout << "设置导航循环！" << std::endl;
   else std::cout << "取消导航循环！" << std::endl;
+}
+
+// 槽函数，处理复位导航点按钮
+void 
+Nav2Panel::onPoseResetButtonClicked() {
+
+  if (!state_machine_.configuration().contains(accumulated_wp_) && !state_machine_.configuration().contains(accumulated_nav_through_poses_)) {
+    acummulated_poses_.clear();
+    updateWpNavigationMarkers();
+    std::cout << "已清除所有导航点！" << std::endl;
+  }
 }
 
 //录制路径槽函数
@@ -891,14 +915,14 @@ Nav2Panel::onAccumulatedNTP()
 //  acummulated_poses_.clear();
 
   std_msgs::msg::UInt8 nav_type_msg;
-  nav_type_msg.data = 0;
+  nav_type_msg.data = 1;
   nav_type_publisher_->publish(nav_type_msg);
 }
 
 void
 Nav2Panel::onAccumulating()
 {
-  acummulated_poses_.clear();
+//  acummulated_poses_.clear();
 }
 
 void
