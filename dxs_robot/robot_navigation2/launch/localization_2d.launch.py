@@ -19,55 +19,55 @@ def generate_launch_description():
     # Get the launch directory
     bringup_dir = get_package_share_directory('robot_navigation2')
 
-    namespace = LaunchConfiguration('namespace')
-    map_yaml_file = LaunchConfiguration('map') #创建了一个 launch 参数，这个参数名为 'map'，map的值将会被传递给map_yaml_file参数（ros2 launch your_launch_file.py map:=/path/to/your/map.yaml）
+    # Load param file
+    namespace = LaunchConfiguration('namespace')    
+    map_yaml_file = LaunchConfiguration('map')
     use_sim_time = LaunchConfiguration('use_sim_time')
     autostart = LaunchConfiguration('autostart')
     params_file = LaunchConfiguration('params_file')
     container_name = LaunchConfiguration('container_name')
     use_respawn = LaunchConfiguration('use_respawn')
-    log_level = LaunchConfiguration('log_level')
+    log_level = LaunchConfiguration('log_level')    
 
     lifecycle_nodes = ['map_server', 'amcl'] #lifecycle_nodes 变量是一个包含要进行生命周期管理的节点名称列表。
 
     remappings = [('/tf', 'tf'),
                   ('/tf_static', 'tf_static')]
-
+    
     # Create our own temporary YAML files that include substitutions
     #param_substitutions 是一个字典，用于定义节点参数中的一些值。这些值可以是来自其他变量或者其他来源的参数替换。
     #当节点启动时，它会使用 param_substitutions 中定义的值来替换对应参数的默认值
+
     param_substitutions = { 
         'use_sim_time': use_sim_time,
         'yaml_filename': map_yaml_file}
-
-    configured_params = RewrittenYaml( #用于从一个 YAML 配置文件中读取参数，并且根据给定的参数重写或修改其中的值
-        source_file=params_file, #表示源 YAML 文件的路径
-        root_key=namespace, #指定在 YAML 文件中要进行参数重写的根键值或命名空间。它用于定位在 YAML 文件中需要修改的特定部分。
-        param_rewrites=param_substitutions, #包含了需要进行替换的参数和它们的值
-        convert_types=True) #是否尝试根据参数值的类型进行转换
-
-    stdout_linebuf_envvar = SetEnvironmentVariable(
-        'RCUTILS_LOGGING_BUFFERED_STREAM', '1')
-
+    
+    configured_params = RewrittenYaml( 
+        source_file=params_file, 
+        root_key=namespace, 
+        param_rewrites=param_substitutions, 
+        convert_types=True)
+    
     declare_namespace_cmd = DeclareLaunchArgument(
         'namespace',
         default_value='',
         description='Top-level namespace')
-
+        
     declare_map_yaml_cmd = DeclareLaunchArgument(
         'map',
+        #default_value=os.path.join(bringup_dir, 'map', 'g1.yaml'),
         description='Full path to map yaml file to load')
 
     declare_use_sim_time_cmd = DeclareLaunchArgument(
         'use_sim_time',
-        default_value='false',
+        default_value='true',#dxs change false
         description='Use simulation (Gazebo) clock if true')
 
     declare_params_file_cmd = DeclareLaunchArgument(
         'params_file',
-        default_value=os.path.join(bringup_dir, 'params', 'nav2_params.yaml'),#'params'?
+        default_value=os.path.join(bringup_dir, 'param', 'nav2_params.yaml'),
         description='Full path to the ROS2 parameters file to use for all launched nodes')
-
+        
     declare_autostart_cmd = DeclareLaunchArgument(
         'autostart', default_value='true',
         description='Automatically startup the nav2 stack')
@@ -75,14 +75,19 @@ def generate_launch_description():
     declare_container_name_cmd = DeclareLaunchArgument(
         'container_name', default_value='nav2_container',
         description='the name of conatiner that nodes will load in if use composition')
-
+    
     declare_use_respawn_cmd = DeclareLaunchArgument(
         'use_respawn', default_value='False',
         description='Whether to respawn if a node crashes. Applied when composition is disabled.')
-
+    
     declare_log_level_cmd = DeclareLaunchArgument(
         'log_level', default_value='info',
         description='log level')
+
+    stdout_linebuf_envvar = SetEnvironmentVariable(
+        'RCUTILS_LOGGING_BUFFERED_STREAM', '1')
+    
+    lifecycle_nodes = ['map_server', 'amcl']
 
     load_nodes = GroupAction(
         actions=[
@@ -119,8 +124,6 @@ def generate_launch_description():
     )
 
     # Create the launch description and populate
-    # 创建了一个名为 ld 的启动描述对象，启动描述是一个用于描述如何启动 ROS 2 节点和系统的对象，它包含了所有要执行的动作，如启动节点、设置参数、设置环境变量等。
-    # 可以逐步添加各种动作（Actions）到这个描述中，然后将其用于启动你的 ROS 2 节点系统。
     ld = LaunchDescription()
 
     # Set environment variables
@@ -139,4 +142,6 @@ def generate_launch_description():
     # Add the actions to launch all of the localiztion nodes
     ld.add_action(load_nodes)
 
-    return ld
+    return ld    
+    
+    

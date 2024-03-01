@@ -1,3 +1,7 @@
+import os
+
+from ament_index_python.packages import get_package_share_directory
+
 from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
@@ -7,18 +11,19 @@ def generate_launch_description():
 	# 创建一个LaunchDescription对象
 	ld = LaunchDescription()
 	
-	# 定义要嵌套的launch文件的路径
-	included_launch_1 = IncludeLaunchDescription(
-		PythonLaunchDescriptionSource('/home/dxs/colcon_ws/src/ros2_21_tutorials/learning_gazebo/launch/load_robot_model_into_gazebo.launch.py')
-	)	#（启动gazebo机器人模型仿真）
-	
-	included_launch_2 = IncludeLaunchDescription(
-		PythonLaunchDescriptionSource('/home/dxs/colcon_ws/src/SLAM/slam_gmapping/slam_gmapping/launch/slam_gmapping.launch.py')
-	)	#（启动gmapping建图）
+	robot_model_launch_dir = os.path.join(get_package_share_directory('robot_description'),'launch')
+	gmapping_launch_dir = os.path.join(get_package_share_directory('slam_gmapping'), 'launch')
 
+	# 定义要嵌套的launch文件的路径
+	included_robot_launch = IncludeLaunchDescription(
+		PythonLaunchDescriptionSource(os.path.join(robot_model_launch_dir, 'load_robot_model_into_gazebo.launch.py')))
+
+	included_gmapping_launch = IncludeLaunchDescription(
+		PythonLaunchDescriptionSource(os.path.join(gmapping_launch_dir, 'slam_gmapping.launch.py')))
+	
 	# 添加嵌套的launch文件到主LaunchDescription中
-	ld.add_action(included_launch_1)
-	ld.add_action(included_launch_2)
+	ld.add_action(included_robot_launch)
+	ld.add_action(included_gmapping_launch)
 
 	# 添加要启动的节点
 	include_node = Node(
