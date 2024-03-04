@@ -1,20 +1,24 @@
 #include "recharge_controller/recharge_controller.hpp"
 
-namespace recharge_controller_ns
-{
-    // RechargeController::RechargeController()
-    // {
+// class RechargeController : public rclcpp::Node
+// {
+// public:
+//   RechargeController() : Node("recharge_controller")
+//   {
+//   }
+// };
 
-    // }
-    // RechargeController::~RechargeController()
-    // {
+// int main(int argc, char** argv)
+// {
+//   rclcpp::init(argc, argv);
 
-    // }
-int main(int argc, char ** argv)
-{
-    rclcpp::init(argc, argv);
-    rclcpp::spin(std::make_shared<recharge_controller_ns::RechargeController>());//这里用spin 类必须要继承Node
-    rclcpp::shutdown();
-    return 0;
-}
-}
+//   auto recharge_controller = std::make_shared<RechargeController>();
+
+//   rclcpp::executors::MultiThreadedExecutor executor;
+//   executor.add_node(recharge_controller);
+//   executor.spin();
+
+//   rclcpp::shutdown();
+
+//   return 0;
+// }
