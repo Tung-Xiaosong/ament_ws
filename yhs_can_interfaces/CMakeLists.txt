@@ -29,6 +29,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 	"msg/LWheelFb.msg"
 	"msg/RWheelFb.msg"
 	"action/RecordPath.action"
+  "srv/Recharge.srv"
+  "srv/DisRecharge.srv"
   DEPENDENCIES std_msgs nav_msgs geometry_msgs
 )
 

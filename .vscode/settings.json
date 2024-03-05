@@ -105,12 +105,12 @@
     ],
     "todo-tree.regex.regexCaseSensitive": false,
     "todo-tree.highlights.defaultHighlight": {  //如果相应变量没赋值就会使用这里的默认值
-        "foreground": "black",      //字体颜色
-        "background": "yellow",     //背景色
+        "foreground": "#000a0a",      //字体颜色
+        "background": "#fdd532",     //背景色
         "icon": "check",            //标签样式 check 是一个对号的样式
-        "rulerColour": "yellow",    //边框颜色
+        "rulerColour": "#fdd532",    //边框颜色
         "type": "tag",              //填充色类型  可在TODO TREE 细节页面找到允许的值 
-        "iconColour": "yellow"      //标签颜色
+        "iconColour": "#fdd532"      //标签颜色
     },
     "todo-tree.highlights.customHighlight": {
 

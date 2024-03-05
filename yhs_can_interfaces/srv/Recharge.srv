@@ -1,0 +1,7 @@
+std_msgs/Header header
+
+geometry_msgs/PoseStamped recharge_goal
+
+---
+
+int8 result

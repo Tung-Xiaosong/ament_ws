@@ -1,0 +1,7 @@
+std_msgs/Header header
+
+std_msgs/String dis_recharge
+
+---
+
+int8 result
