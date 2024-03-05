@@ -81,11 +81,11 @@ class RechargeController : public rclcpp::Node {
     // // 回充超时时间
     // double time_out_;
 
-    // // 角度误差
-    // double yaw_delta_;
+    // 角度误差
+    double yaw_delta_;
 
-    // // 距离误差
-    // double dist_delta_;
+    // 距离误差
+    double dist_delta_;
 
     // // 底盘角度反馈
     // double angular_fb_;
@@ -126,8 +126,8 @@ class RechargeController : public rclcpp::Node {
     // void publishCmdVel(const double linear_vel, const double angular_vel);
     // void publishCtrlCmd(const double linear_vel, const double angular_vel, const unsigned char gear, const double slipangle);
 
-    // // 计算最短路径
-    // //inline double distanceToLine(Vector2d A, Vector2d dir, Vector2d B);
+    // 计算最短路径
+    inline double distanceToLine(Vector2d A, Vector2d dir, Vector2d B);
 
     // 回充控制函数
     void rechargeControl();

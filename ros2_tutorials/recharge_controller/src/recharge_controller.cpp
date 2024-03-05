@@ -2,6 +2,9 @@
 
 RechargeController::RechargeController() : Node("recharge_controller_node")
   , recharge_dist_(0.8)
+  , bms_charge_done_(false)
+  , yaw_delta_(0.05)
+  , dist_delta_(0.005)
 {
   tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
@@ -33,12 +36,6 @@ RechargeController::RechargeController() : Node("recharge_controller_node")
           std::bind(&RechargeController::disRechargeCallback, this, std::placeholders::_1, std::placeholders::_2));
 }
 
-// bool RechargeController::rechargeCallback(const std::shared_ptr<rmw_request_id_t> request_header,
-//                            const std::shared_ptr<yhs_can_interfaces::srv::Recharge::Request> request,
-//                            const std::shared_ptr<yhs_can_interfaces::srv::Recharge::Response> response)
-// {
-
-// }
 
 // done
 bool RechargeController::goToBackPoint()
@@ -103,7 +100,7 @@ bool RechargeController::rechargeCallback(
 
   back_point_.pose.orientation = request->recharge_goal.pose.orientation;
   back_point_.pose.position.x = recharge_x_ + std::cos(recharge_yaw_) * recharge_dist_;
-  back_point_.pose.position.y = recharge_x_ + std::cos(recharge_yaw_) * recharge_dist_;
+  back_point_.pose.position.y = recharge_x_ + std::sin(recharge_yaw_) * recharge_dist_;
   back_point_.pose.position.z = 0;
 
   bool to_back_point = goToBackPoint();
@@ -141,7 +138,7 @@ void RechargeController::rechargeControl()
   // 使用互斥锁保护访问类成员变量的线程安全
   std::lock_guard<std::mutex> lock(mutex_);
 
-  // 使用tf2_ros包中的Buffer和TransformListener类来获取坐标变换
+  // 使用tf2_ros包中的Buffer和TransformListener类来获取坐标变换，获取base_link机器人当前坐标
   try
   {
     geometry_msgs::msg::TransformStamped transform = tf_buffer_->lookupTransform("map", "base_link", tf2::TimePointZero);
@@ -160,6 +157,81 @@ void RechargeController::rechargeControl()
   {
     RCLCPP_ERROR(this->get_logger(), "Transform lookup failed: %s", ex.what());
   }
+
+  geometry_msgs::msg::PointStamped recharge_point;// 回充点
+  recharge_point.header.frame_id = "map";
+  recharge_point.point.x = recharge_x_;
+  recharge_point.point.y = recharge_y_;
+  recharge_point.point.z = 0.0;
+  // 将回充点坐标从map下转换为base_link下
+  geometry_msgs::msg::PointStamped recharge_point_to_base_link_point;
+  try
+  {
+    recharge_point_to_base_link_point = tf_buffer_->transform(recharge_point, "base_link");
+  }
+  catch (tf2::TransformException &ex)
+  {
+    RCLCPP_ERROR(this->get_logger(), "Failed to transform point: %s", ex.what());
+    return;
+  }
+
+  // 计算机器人当前位置到回充点的距离和方向
+  double dx_to_recharge_point = robot_x_ - recharge_x_;
+  double dy_to_recharge_point = robot_y_ - recharge_y_;
+  double dist_to_recharge_point = std::sqrt(dx_to_recharge_point * dx_to_recharge_point + dy_to_recharge_point * dy_to_recharge_point);
+  //double yaw_diff_to_recharge_point = tf2::getYaw(tf2::Quaternion(0, 0, sin((robot_yaw_ - recharge_yaw_) / 2), cos((robot_yaw_ - recharge_yaw_) / 2)));
+  tf2::Quaternion quaternion;
+  quaternion.setRPY(0, 0, (robot_yaw_ - recharge_yaw_) / 2);
+  double roll, pitch, yaw;
+  tf2::Matrix3x3(quaternion).getRPY(roll, pitch, yaw);
+  double yaw_diff_to_recharge_point = yaw;
+
+  Eigen::Vector2d A(recharge_x_, recharge_y_);// 使用Vector2d类创建了A和B两个二维向量对象，分别表示充电桩的位置(recharge_x_, recharge_y_)和机器人的位置(robot_x_, robot_y_)
+  double angle = recharge_yaw_;
+  Eigen::Vector2d dir(cos(angle), sin(angle));// 将充电桩的朝向recharge_yaw_通过cos()和sin()函数分别计算出方向向量dir的x和y分量
+  Eigen::Vector2d B(robot_x_, robot_y_);
+  double shortest_dist = distanceToLine(A, dir, B);// 计算了机器人当前位置与充电桩之间的最短距离。（垂直于充电桩的最短距离）
+
+  // --------------------
+  // 计算机器人需要的线速度和角速度
+  double linear_vel = -0.08;
+  double angular_vel = 0.0;
+  unsigned char gear = 7;
+  double slipangle = 0.0;
+
+  if(!bms_charge_done_)
+  {
+    if(fabs(yaw_diff_to_recharge_point) >= yaw_delta_ && fabs(shortest_dist) > 0.5)// 角度相差太大，原地旋转调整角度
+    {
+      yaw_delta_ = 0.05;
+      angular_vel = yaw_diff_to_recharge_point > 0 ? -0.08 : 0.08;
+      linear_vel = 0.0;
+      gear = 6;
+    }
+    if(fabs(yaw_diff_to_recharge_point) < yaw_delta_)
+    {
+      yaw_delta_ = 0.1;
+    }
+
+    // 往左偏了
+    if(recharge_point_to_base_link_point.point.y > 0 && fabs(shortest_dist) > dist_delta_)
+    {
+      linear_vel = -0.08; 
+      angular_vel = 0.0;
+      slipangle = -7;
+      dist_delta_ = 0.005;
+      gear = 7;
+    }
+  }
+}
+
+double RechargeController::distanceToLine(Vector2d A, Vector2d dir, Vector2d B)
+{
+  Vector2d AB = B - A;
+  Vector2d u = dir.normalized();
+  double AP = AB.dot(u);
+  double dist = sqrt(AB.dot(AB) - AP * AP);
+  return dist;
 }
 
 // 发布控制指令 // done
