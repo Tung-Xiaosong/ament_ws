@@ -1,27 +1,31 @@
 #include "recharge_controller/recharge_controller.hpp"
 
 RechargeController::RechargeController() : Node("recharge_controller_node")
-  , recharge_dist_(0.8)
+  //, recharge_dist_(0.8)
   , bms_charge_done_(false)
   , yaw_delta_(0.05)
   , dist_delta_(0.005)
+  , is_charge_done_(false)
+  , is_charge_failed_(false)
+  , time_out_(5.0)
 {
   tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
   //参数
-  control_frequency_ = this->declare_parameter<int>("recharge_control_frequency", 33);
-  recharge_repeat_ = this->declare_parameter<int>("recharge_repeat", 3);
+  control_frequency_ = this->declare_parameter<int>("recharge_control_frequency", 33);// 回充控制频率
+  recharge_repeat_ = this->declare_parameter<int>("recharge_repeat", 3);// 回充重复次数
+  recharge_dist_ = this->declare_parameter<double>("recharge_distance", 0.8);// 回充距离
 
   //topic
   //发布速度话题
   cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 1);
 
   //发布控制话题
-  ctrl_cmd_pub_ = this->create_publisher<yhs_can_interfaces::msg::CtrlCmd>("ctrl_cmd", 1);
+  ctrl_cmd_pub_ = this->create_publisher<yhs_can_interfaces::msg::FwCtrlCmd>("ctrl_cmd", 1);
   
   //订阅bms信息
-  bms_flag_sub_ = this->create_subscription<yhs_can_interfaces::msg::ChassisInfoFb>("chassis_info_fb", 1, \
+  bms_flag_sub_ = this->create_subscription<yhs_can_interfaces::msg::FwIoFb>("io_fb", 1, \
   std::bind(&RechargeController::chassisInfoCallback, this, std::placeholders::_1));
 
   //service
@@ -35,6 +39,7 @@ RechargeController::RechargeController() : Node("recharge_controller_node")
           "dis_recharge",
           std::bind(&RechargeController::disRechargeCallback, this, std::placeholders::_1, std::placeholders::_2));
 }
+
 
 
 // done
@@ -63,12 +68,12 @@ bool RechargeController::goToBackPoint()
 
   auto send_goal_options = rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SendGoalOptions();
   auto future_goal_handle = navigation_action_client_->async_send_goal(navigation_goal, send_goal_options);
+  
   std::chrono::milliseconds server_timeout(1000);
-
   if(rclcpp::spin_until_future_complete(shared_from_this(), future_goal_handle, server_timeout) == 
     rclcpp::FutureReturnCode::SUCCESS)
   {
-    RCLCPP_INFO(this->get_logger(), "Reach back point !");
+    RCLCPP_INFO(this->get_logger(), "Reached back point !");
     return true;
   }  
 
@@ -76,6 +81,7 @@ bool RechargeController::goToBackPoint()
   return false;
 }
 
+// done
 bool RechargeController::rechargeCallback(
   const std::shared_ptr<yhs_can_interfaces::srv::Recharge::Request> request,
   const std::shared_ptr<yhs_can_interfaces::srv::Recharge::Response> response)
@@ -121,9 +127,28 @@ bool RechargeController::rechargeCallback(
     {
       // 执行回充
       rechargeControl();
+
+      // 充电成功
+      if(is_charge_done_)
+      {
+        publishCmdVel(0.0, 0.0);
+        reset();
+        RCLCPP_INFO(this->get_logger(), "Recharge done !!!");
+        response->result = 1;
+        break;
+      }
+      else if (is_charge_failed_)
+      {
+        publishCmdVel(0.0, 0.0);
+        reset();
+        RCLCPP_INFO(this->get_logger(), "Recharge failed !!!");
+        response->result = 0;
+        break;
+      }
+      rclcpp::WallRate loop_rate(control_frequency_);
     }
-    
   }
+  return true;
 }
 
 bool RechargeController::disRechargeCallback(
@@ -133,6 +158,7 @@ bool RechargeController::disRechargeCallback(
 
 }
 
+// 执行回充 // done
 void RechargeController::rechargeControl()
 {
   // 使用互斥锁保护访问类成员变量的线程安全
@@ -203,7 +229,7 @@ void RechargeController::rechargeControl()
   {
     if(fabs(yaw_diff_to_recharge_point) >= yaw_delta_ && fabs(shortest_dist) > 0.5)// 角度相差太大，原地旋转调整角度
     {
-      yaw_delta_ = 0.05;
+      //yaw_delta_ = 0.05;
       angular_vel = yaw_diff_to_recharge_point > 0 ? -0.08 : 0.08;
       linear_vel = 0.0;
       gear = 6;
@@ -222,7 +248,49 @@ void RechargeController::rechargeControl()
       dist_delta_ = 0.005;
       gear = 7;
     }
+    //往右偏了
+    if(recharge_point_to_base_link_point.point.y < 0 && fabs(shortest_dist) > dist_delta_)
+    {
+      linear_vel = -0.08;
+      angular_vel = 0.0;
+      slipangle = 7;
+      dist_delta_ = 0.005;
+      gear = 7;
+    }
+    if(shortest_dist <= dist_delta_)
+    {
+      dist_delta_ = 0.01;
+    }    
   }
+  else{
+    if(bms_charge_done_)
+    {
+      is_charge_done_ = true;
+      return;
+    }
+  }
+
+  // 后退过程中障碍物检测
+
+  // 异常处理，超时检测
+  if(fabs(dist_to_recharge_point) < 0.3)
+  {
+    charge_time_out_ ++;
+    if(static_cast<double>(charge_time_out_ / control_frequency_) > time_out_ && !bms_charge_done_)
+    {
+      RCLCPP_WARN(this->get_logger(), "Charging timeout !");
+      is_charge_failed_ = true;
+      charge_time_out_ = 0;
+      return;
+    }
+  }
+  // 异常处理，偏离充电桩检测
+
+  // 发布控制指令
+  if(gear == 6)
+    publishCmdVel(linear_vel, angular_vel);
+  else
+    publishCtrlCmd(linear_vel, angular_vel, gear, slipangle);
 }
 
 double RechargeController::distanceToLine(Vector2d A, Vector2d dir, Vector2d B)
@@ -243,12 +311,40 @@ void RechargeController::publishCmdVel(const double linear_vel, const double ang
   cmd_vel_pub_->publish(cmd_vel);
 }
 
-void RechargeController::chassisInfoCallback(const yhs_can_interfaces::msg::ChassisInfoFb::SharedPtr chassis_info_msg)
+// 发布控制指令 // done
+void RechargeController::publishCtrlCmd(const double linear_vel, const double angular_vel, const unsigned char gear, const double slipangle)
 {
+  yhs_can_interfaces::msg::FwCtrlCmd ctrl_msg;
+  ctrl_msg.ctrl_cmd_gear = gear;
+  ctrl_msg.ctrl_cmd_linear = linear_vel;
+  ctrl_msg.ctrl_cmd_angular = angular_vel;
+  ctrl_msg.ctrl_cmd_slipangle = slipangle;
 
+  ctrl_cmd_pub_->publish(ctrl_msg);
 }
 
+// 订阅bms信号 // done
+void RechargeController::chassisInfoCallback(const yhs_can_interfaces::msg::FwIoFb::SharedPtr io_fb_msg)
+{
+  std::lock_guard<std::mutex> lock(mutex_);
+  bms_charge_done_ = io_fb_msg -> io_fb_charge_state;
+}
 
+// 变量复位 // done
+void RechargeController::reset()
+{
+  std::lock_guard<std::mutex> lock(mutex_);
+
+  is_charge_done_ = false;
+  is_charge_failed_ = false;
+
+  bms_charge_done_ = false;
+  
+  yaw_delta_ = 0.05;
+  dist_delta_ = 0.005;
+
+  time_out_ = 5.0;
+}
 
 
 

@@ -18,19 +18,62 @@ find_package(geometry_msgs REQUIRED)
 
 # Generate messages
 rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/BmsFb.msg"
-	"msg/BmsFlagFb.msg"
-	"msg/ChassisInfoFb.msg"
-	"msg/CtrlCmd.msg"
-	"msg/CtrlFb.msg"
-	"msg/FreeCtrlCmd.msg"
-	"msg/IoCmd.msg"
-	"msg/IoFb.msg"
-	"msg/LWheelFb.msg"
-	"msg/RWheelFb.msg"
-	"action/RecordPath.action"
-  "srv/Recharge.srv"
+  #DGT
+  "msg/DgtBmsFb.msg"
+  "msg/DgtBmsFlagFb.msg"
+  "msg/DgtChassisInfoFb.msg"
+  "msg/DgtCtrlCmd.msg"
+  "msg/DgtCtrlFb.msg"
+  "msg/DgtFreeCtrlCmd.msg"
+  "msg/DgtIoCmd.msg"
+  "msg/DgtIoFb.msg"
+  "msg/DgtLWheelFb.msg"
+  "msg/DgtRWheelFb.msg"
+  #FW
+  "msg/FwBmsFb.msg"
+  "msg/FwBmsFlagFb.msg"
+  "msg/FwChassisInfoFb.msg"
+  "msg/FwCtrlCmd.msg"
+  "msg/FwCtrlFb.msg"
+  "msg/FwFrontAngleFb.msg"
+  "msg/FwIoCmd.msg"
+  "msg/FwIoFb.msg"
+  "msg/FwLfWheelFb.msg"
+  "msg/FwLrWheelFb.msg"
+  "msg/FwRearAngleFb.msg"
+  "msg/FwRfWheelFb.msg"
+  "msg/FwRrWheelFb.msg"
+  #FR
+  "msg/FrBmsFlagInfoFb.msg"
+  "msg/FrBmsInfoFb.msg"
+  "msg/FrChassisInfoFb.msg"
+  "msg/FrCtrlCmd.msg"
+  "msg/FrCtrlFb.msg"
+  "msg/FrDriveMcuEcodeFb.msg"
+  "msg/FrIoCmd.msg"
+  "msg/FrIoFb.msg"
+  "msg/FrLrWheelFb.msg"
+  "msg/FrRrWheelFb.msg"
+  "msg/FrVehDiagFb.msg"
+  #MK
+  "msg/MkBmsFlagInfoFb.msg"
+  "msg/MkBmsInfoFb.msg"
+  "msg/MkChassisInfoFb.msg"
+  "msg/MkCtrlCmd.msg"
+  "msg/MkCtrlFb.msg"
+  "msg/MkDriveMcuEcodeFb.msg"
+  "msg/MkIoCmd.msg"
+  "msg/MkIoFb.msg"
+  "msg/MkLrWheelFb.msg"
+  "msg/MkRrWheelFb.msg"
+  "msg/MkVehDiagFb.msg"
+
+  #srv
   "srv/DisRecharge.srv"
+  "srv/Recharge.srv"
+  
+  #action
+  "action/RecordPath.action"
   DEPENDENCIES std_msgs nav_msgs geometry_msgs
 )
 
@@ -45,5 +88,13 @@ if(BUILD_TESTING)
   set(amentCmakeCpplintFOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
+
+include_directories(include)
+
+install(DIRECTORY include/
+   DESTINATION include/
+)
+    
+ament_export_include_directories(include)
 
 ament_package()

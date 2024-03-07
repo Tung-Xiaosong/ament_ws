@@ -17,8 +17,8 @@
 #include "rclcpp_action/rclcpp_action.hpp"
 #include "yhs_can_interfaces/srv/recharge.hpp"
 #include "yhs_can_interfaces/srv/dis_recharge.hpp"
-#include "yhs_can_interfaces/msg/chassis_info_fb.hpp"
-#include "yhs_can_interfaces/msg/ctrl_cmd.hpp"
+#include "yhs_can_interfaces/msg/fw_io_fb.hpp"
+#include "yhs_can_interfaces/msg/fw_ctrl_cmd.hpp"
 
 // dxs add ------------------------
 #include <tf2/LinearMath/Quaternion.h>
@@ -68,7 +68,8 @@ class RechargeController : public rclcpp::Node {
     // // 后退时遇到障碍物累积时长计数
     // int time_obs_taltol_;
 
-    // int charge_time_out_; // dxscpp
+    // 超时累计
+    int charge_time_out_; // dxscpp
     // // 前进脱离充电桩时遇到障碍物累积时长计数
     // int front_time_obs_taltol_;
 
@@ -78,8 +79,8 @@ class RechargeController : public rclcpp::Node {
     // 控制频率
     int control_frequency_;
 
-    // // 回充超时时间
-    // double time_out_;
+    // 回充超时时间
+    double time_out_;
 
     // 角度误差
     double yaw_delta_;
@@ -92,13 +93,13 @@ class RechargeController : public rclcpp::Node {
 
     // 控制指令发布器
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_pub_;
-    rclcpp::Publisher<yhs_can_interfaces::msg::CtrlCmd>::SharedPtr ctrl_cmd_pub_;
+    rclcpp::Publisher<yhs_can_interfaces::msg::FwCtrlCmd>::SharedPtr ctrl_cmd_pub_;
 
-    // // 回充是否成功标志
-    // bool is_charge_done_;
+    // 回充是否成功标志
+    bool is_charge_done_;
 
-    // // 充电失败
-    // bool is_charge_failed_;
+    // 充电失败
+    bool is_charge_failed_;
 
     // bms反馈充电成功标志
     bool bms_charge_done_;
@@ -123,8 +124,7 @@ class RechargeController : public rclcpp::Node {
 
     // 控制指令发布函数
     void publishCmdVel(const double linear_vel, const double angular_vel);
-    // void publishCmdVel(const double linear_vel, const double angular_vel);
-    // void publishCtrlCmd(const double linear_vel, const double angular_vel, const unsigned char gear, const double slipangle);
+    void publishCtrlCmd(const double linear_vel, const double angular_vel, const unsigned char gear, const double slipangle);
 
     // 计算最短路径
     inline double distanceToLine(Vector2d A, Vector2d dir, Vector2d B);
@@ -137,12 +137,12 @@ class RechargeController : public rclcpp::Node {
     // 导航到回充后退点
     bool goToBackPoint();
 
-    // // 复位
-    // void reset();
+    // 复位
+    void reset();
 
     // bms反馈
     // //void chassisInfoCallback(const yhs_can_interfaces::msg::ChassisInfoFb::SharedPtr chassis_info_msg); // dxs
-    void chassisInfoCallback(const yhs_can_interfaces::msg::ChassisInfoFb::SharedPtr chassis_info_msg);
+    void chassisInfoCallback(const yhs_can_interfaces::msg::FwIoFb::SharedPtr io_fb_msg);
 
     // 线程相关的变量和函数
     // std::thread thread_;
@@ -164,7 +164,7 @@ class RechargeController : public rclcpp::Node {
     // // ROS订阅器
     // rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
     // //rclcpp::Subscription<yhs_can_interfaces::msg::Recharge>::SharedPtr recharge_sub_;
-    rclcpp::Subscription<yhs_can_interfaces::msg::ChassisInfoFb>::SharedPtr bms_flag_sub_;
+    rclcpp::Subscription<yhs_can_interfaces::msg::FwIoFb>::SharedPtr bms_flag_sub_;
 
     // rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr angular_fb_sub_;
 
