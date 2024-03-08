@@ -56,7 +56,7 @@ bool RechargeController::goToBackPoint()
   if(!is_action_server_ready)
   {
     RCLCPP_ERROR(this->get_logger(), "Waiting for the navigate_to_pose action server to come up !");
-    //return 0; // test
+    return 0; // test
   }
 
   // 发送导航点请求
@@ -155,7 +155,52 @@ bool RechargeController::disRechargeCallback(
   const std::shared_ptr<yhs_can_interfaces::srv::DisRecharge::Request> request,
   const std::shared_ptr<yhs_can_interfaces::srv::DisRecharge::Response> response)
 {
+  response->result = 0;
 
+  //检查脱桩过程中是否有障碍物
+
+  double leave_dist_ = 0.0; //到充电桩的距离
+  while (rclcpp::ok() && leave_dist_ < 0.5)
+  {
+    try
+    {
+      geometry_msgs::msg::TransformStamped transform = tf_buffer_->lookupTransform("map", "base_link", tf2::TimePointZero);
+
+      // 获取机器人当前坐标
+      robot_x_ = transform.transform.translation.x;
+      robot_y_ = transform.transform.translation.y;
+
+      tf2::Quaternion q;
+      tf2::fromMsg(transform.transform.rotation, q);
+      double roll, pitch, yaw;
+      tf2::Matrix3x3(q).getRPY(roll, pitch, yaw);
+      robot_yaw_ = yaw;
+    }
+    catch (tf2::TransformException &ex)
+    {
+      RCLCPP_ERROR(this->get_logger(), "Transform lookup failed: %s", ex.what());
+    }
+
+    // 计算机器人当前位置到回充点的距离
+    double dx_to_recharge_point = robot_x_ - recharge_x_;
+    double dy_to_recharge_point = robot_y_ - recharge_y_;
+    double dist_to_recharge_point = std::sqrt(dx_to_recharge_point * dx_to_recharge_point + dy_to_recharge_point * dy_to_recharge_point);
+
+    double linear = 0.1;// 前进的线速度
+
+    // 障碍物检测
+
+    // 发布速度
+    publishCmdVel(linear, 0.0);
+
+  }
+
+  rclcpp::WallRate loop_rate(control_frequency_);
+  
+  publishCmdVel(0.0, 0.0);
+
+  response->result = 1;
+  return true;
 }
 
 // 执行回充 // done
@@ -293,6 +338,7 @@ void RechargeController::rechargeControl()
     publishCtrlCmd(linear_vel, angular_vel, gear, slipangle);
 }
 
+// done
 double RechargeController::distanceToLine(Vector2d A, Vector2d dir, Vector2d B)
 {
   Vector2d AB = B - A;
