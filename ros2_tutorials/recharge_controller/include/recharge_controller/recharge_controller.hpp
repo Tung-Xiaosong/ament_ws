@@ -48,6 +48,7 @@ class RechargeController : public rclcpp::Node {
     // void stop();
 
   private:
+  rclcpp::Node::SharedPtr node;
     // 机器人当前位置和回充点的坐标
     double robot_x_;
     double robot_y_;
