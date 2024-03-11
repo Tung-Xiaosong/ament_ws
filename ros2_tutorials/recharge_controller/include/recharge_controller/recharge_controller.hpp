@@ -17,13 +17,12 @@
 #include "rclcpp_action/rclcpp_action.hpp"
 #include "yhs_can_interfaces/srv/recharge.hpp"
 #include "yhs_can_interfaces/srv/dis_recharge.hpp"
-#include "yhs_can_interfaces/msg/fw_io_fb.hpp"
-#include "yhs_can_interfaces/msg/fw_ctrl_cmd.hpp"
+#include "yhs_can_interfaces/msg/io_fb.hpp"
+#include "yhs_can_interfaces/msg/ctrl_cmd.hpp"
 
 // dxs add ------------------------
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Matrix3x3.h>
-#include "rclcpp_action/rclcpp_action.hpp"
 #include "nav2_msgs/action/navigate_to_pose.hpp"
 
 #include "tf2_ros/buffer.h"
@@ -48,7 +47,7 @@ class RechargeController : public rclcpp::Node {
     // void stop();
 
   private:
-  rclcpp::Node::SharedPtr node;
+    using NavigationToPose = nav2_msgs::action::NavigateToPose;
     // 机器人当前位置和回充点的坐标
     double robot_x_;
     double robot_y_;
@@ -94,7 +93,7 @@ class RechargeController : public rclcpp::Node {
 
     // 控制指令发布器
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_pub_;
-    rclcpp::Publisher<yhs_can_interfaces::msg::FwCtrlCmd>::SharedPtr ctrl_cmd_pub_;
+    rclcpp::Publisher<yhs_can_interfaces::msg::CtrlCmd>::SharedPtr ctrl_cmd_pub_;
 
     // 回充是否成功标志
     bool is_charge_done_;
@@ -143,7 +142,7 @@ class RechargeController : public rclcpp::Node {
 
     // bms反馈
     // //void chassisInfoCallback(const yhs_can_interfaces::msg::ChassisInfoFb::SharedPtr chassis_info_msg); // dxs
-    void chassisInfoCallback(const yhs_can_interfaces::msg::FwIoFb::SharedPtr io_fb_msg);
+    void chassisInfoCallback(const yhs_can_interfaces::msg::IoFb::SharedPtr io_fb_msg);
 
     // 线程相关的变量和函数
     // std::thread thread_;
@@ -165,7 +164,7 @@ class RechargeController : public rclcpp::Node {
     // // ROS订阅器
     // rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
     // //rclcpp::Subscription<yhs_can_interfaces::msg::Recharge>::SharedPtr recharge_sub_;
-    rclcpp::Subscription<yhs_can_interfaces::msg::FwIoFb>::SharedPtr bms_flag_sub_;
+    rclcpp::Subscription<yhs_can_interfaces::msg::IoFb>::SharedPtr bms_flag_sub_;
 
     // rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr angular_fb_sub_;
 
